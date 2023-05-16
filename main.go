@@ -93,7 +93,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 
     default:
       resMessage := fmt.Sprintf("unknown action: %s", message.Action)
-      if err := conn.WriteMessage(websocket.TextMessage, []byte(resMessage)); err != nil {
+      if err := sendResponseMessage(conn, resMessage); err != nil {
         log.Println(err)
         return
       }
@@ -102,7 +102,11 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendResponseMessage(conn *websocket.Conn, message string) error {
-  if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+  m := ResponseMessage{
+    Type:    Info,
+    Content: message,
+  }
+  if err := conn.WriteJSON(m); err != nil {
     log.Println(err)
     return err
   }

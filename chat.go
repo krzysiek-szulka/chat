@@ -27,6 +27,19 @@ type Message struct {
   Content  string     `json:"content"`
 }
 
+type ResponseType string
+
+const (
+  Text ResponseType = "text"
+  Info ResponseType = "info"
+)
+
+type ResponseMessage struct {
+  RoomName string       `json:"room_name"`
+  Type     ResponseType `json:"type"`
+  Content  string       `json:"content"`
+}
+
 func (c *Chat) CreateRoom(name string) {
   c.mutex.Lock()
   defer c.mutex.Unlock()
@@ -76,7 +89,12 @@ func (c *Chat) HandleBroadcast() {
     }
 
     for conn := range room.Participants {
-      if err := conn.WriteMessage(websocket.TextMessage, []byte(message.Content)); err != nil {
+      m := ResponseMessage{
+        RoomName: message.RoomName,
+        Type:     Text,
+        Content:  message.Content,
+      }
+      if err := conn.WriteJSON(m); err != nil {
         log.Println(err)
         return
       }
