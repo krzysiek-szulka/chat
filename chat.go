@@ -41,19 +41,18 @@ type ResponseMessage struct {
 }
 
 func (c *Chat) CreateRoom(name string) {
-  c.mutex.Lock()
-  defer c.mutex.Unlock()
-
   _, found := c.rooms[name]
   if found {
     log.Printf("room `%s` already exists", name)
     return
   }
 
+  // c.mutex.Lock() - it might be helpful if we add the user who created the room to the room immediately
   c.rooms[name] = Room{
     Name:         name,
     Participants: map[*websocket.Conn]bool{},
   }
+  // c.mutex.Unlock()
 
   log.Printf("created room with name %s", name)
   log.Println("Existing rooms:", c.rooms)
